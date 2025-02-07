@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { sleep, cleanupTasks, isValidProcessTaskArgs, isValidCheckTaskStatusArgs } from './utils';
-import { TaskStatusEnum } from './types';
+import { TaskStatusEnum, type TaskStatus } from './types';
 
 describe('Utils', () => {
   describe('sleep', () => {
@@ -14,7 +14,7 @@ describe('Utils', () => {
   });
 
   describe('cleanupTasks', () => {
-    let tasks: Map<string, any>;
+    let tasks: Map<string, TaskStatus>;
 
     beforeEach(() => {
       tasks = new Map();
@@ -23,9 +23,9 @@ describe('Utils', () => {
 
     it('should remove expired tasks', () => {
       const now = Date.now();
-      tasks.set('task1', { timestamp: now - 2000 });
-      tasks.set('task2', { timestamp: now - 1000 });
-      tasks.set('task3', { timestamp: now });
+      tasks.set('task1', { status: TaskStatusEnum.Pending, timestamp: now - 2000 });
+      tasks.set('task2', { status: TaskStatusEnum.Pending, timestamp: now - 1000 });
+      tasks.set('task3', { status: TaskStatusEnum.Pending, timestamp: now });
 
       cleanupTasks(tasks, 1500);
 

@@ -19,7 +19,6 @@ import {
   TaskError,
 } from './types.js';
 import {
-  DEBUG,
   DEFAULT_TASK_DELAY_MS,
   DEFAULT_TASK_TIMEOUT_MS,
   DEFAULT_POLL_DELAY_MS,
@@ -64,7 +63,7 @@ class ExampleMcpServer {
 
   private setupErrorHandling(): void {
     // Error handling
-    this.server.onerror = (error) => {
+    this.server.onerror = (error): void => {
       logger.error('Server', `MCP Error: ${error instanceof Error ? error.stack : error}`);
       if (error instanceof TaskError) {
         throw new McpError(ErrorCode.InvalidRequest, error.message);
@@ -73,8 +72,8 @@ class ExampleMcpServer {
     };
 
     // Graceful shutdown
-    process.on('SIGINT', async () => {
-      await this.cleanup();
+    process.on('SIGINT', () => {
+      void this.cleanup();
       process.exit(0);
     });
   }
@@ -82,12 +81,12 @@ class ExampleMcpServer {
   private setupCleanup(): void {
     // Cleanup old tasks periodically
     this.cleanupInterval = setInterval(() => {
-      cleanupTasks(this.activeTasks, DEFAULT_TASK_TIMEOUT_MS * 2);
+      void cleanupTasks(this.activeTasks, DEFAULT_TASK_TIMEOUT_MS * 2);
     }, DEFAULT_TASK_TIMEOUT_MS);
   }
 
   private setupToolHandlers(): void {
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => ({
+    this.server.setRequestHandler(ListToolsRequestSchema, () => Promise.resolve({
       tools: [
         {
           name: 'process_task',
@@ -132,9 +131,9 @@ class ExampleMcpServer {
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       if (request.params.name === 'process_task') {
-        return this.handleProcessTask(request.params.arguments);
+        return await this.handleProcessTask(request.params.arguments);
       } else if (request.params.name === 'check_task_status') {
-        return this.handleCheckTaskStatus(request.params.arguments);
+        return await this.handleCheckTaskStatus(request.params.arguments);
       } else {
         throw new McpError(
           ErrorCode.MethodNotFound,
@@ -169,8 +168,8 @@ class ExampleMcpServer {
       timeoutAt: Date.now() + timeoutMs
     });
 
-    // Start processing in background
-    this.processTask(taskId, input, delayMs).catch(error => {
+    // Start processing in background and wait for initial setup
+    await this.processTask(taskId, input, delayMs).catch(error => {
       logger.error('ProcessTask', `Task ${taskId} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       this.activeTasks.set(taskId, {
         status: TaskStatusEnum.Error,
@@ -236,7 +235,7 @@ class ExampleMcpServer {
     const initialStatus = task.status;
     
     try {
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         const checkInterval = setInterval(() => {
           const currentTask = this.activeTasks.get(taskId);
           if (!currentTask) {
@@ -261,14 +260,14 @@ class ExampleMcpServer {
           if (currentTask.status !== initialStatus || 
               [TaskStatusEnum.Complete, TaskStatusEnum.Error].includes(currentTask.status)) {
             clearInterval(checkInterval);
-            resolve(true);
+            resolve();
           }
         }, POLL_INTERVAL_MS);
 
         // Set timeout to resolve after poll delay
         setTimeout(() => {
           clearInterval(checkInterval);
-          resolve(false);
+          resolve();
         }, DEFAULT_POLL_DELAY_MS);
       });
     } catch (error) {
@@ -363,4 +362,4 @@ class ExampleMcpServer {
 }
 
 const server = new ExampleMcpServer();
-server.run().catch(console.error);
+void server.run().catch(console.error);
