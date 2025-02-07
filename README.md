@@ -143,10 +143,44 @@ npm run build
 npm run watch
 
 # Run tests
-npm test
+npm test                  # Run all tests
+npm run test:watch       # Run tests in watch mode
+npm run test:coverage    # Generate test coverage report
+npm run test:ui          # Open interactive test UI
 
 # Run linter
 npm run lint
+```
+
+### Testing
+
+The project uses Vitest for testing, offering several advantages:
+- 🚄 Up to 20x faster than Jest
+- 📝 Native TypeScript support
+- 🔄 Watch mode with HMR
+- 🎯 Smart test filtering
+- 📊 Built-in coverage reporting
+- 🖥️ Interactive UI mode
+- ⚡ Powered by Vite
+
+Example test:
+```typescript
+import { describe, it, expect } from 'vitest';
+import { sleep } from './utils';
+
+describe('Utils', () => {
+  it('should wait for the specified time', async () => {
+    const start = Date.now();
+    await sleep(100);
+    const elapsed = Date.now() - start;
+    expect(elapsed).toBeGreaterThanOrEqual(100);
+  });
+});
+```
+
+Run the interactive UI to view and debug tests:
+```bash
+npm run test:ui
 ```
 
 ## 🤝 Contributing

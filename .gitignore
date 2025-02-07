@@ -5,6 +5,12 @@ node_modules/
 build/
 dist/
 
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+coverage.json
+
 # Environment variables
 .env
 .env.local
@@ -33,3 +39,8 @@ yarn-error.log*
 ehthumbs.db
 Thumbs.db 
 .aider*
+
+# Test artifacts
+**/*.test.js.snap
+.vitest/
+html/
