@@ -1,20 +1,44 @@
-# Example Async MCP Server
+# MCP Async Server
 
-A Model Context Protocol (MCP) server demonstrating asynchronous task processing with status tracking. This example shows how to implement long-running tasks in an MCP server with proper error handling, timeouts, and status updates.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-## Features
+> 🚀 A high-performance Model Context Protocol (MCP) server implementation showcasing asynchronous task processing with robust status tracking and error handling.
 
-- Asynchronous task processing
-- Task status tracking and polling
-- Automatic task cleanup
-- Timeout handling
-- Error handling with custom error types
-- TypeScript support
-- Proper resource management
+<p align="center">
+  <em>Built with TypeScript • Powered by Node.js • MCP Protocol</em>
+</p>
 
-## Installation
+---
+
+## ✨ Features
+
+- 🔄 **Asynchronous Task Processing** - Handle long-running operations efficiently
+- 📊 **Real-time Status Tracking** - Monitor task progress with polling support
+- 🧹 **Automatic Resource Management** - Smart task cleanup and memory management
+- ⏱️ **Timeout Handling** - Configurable timeouts for tasks
+- 🛡️ **Robust Error Handling** - Custom error types and comprehensive error reporting
+- 📝 **TypeScript Support** - Full type safety and modern JavaScript features
+- 🔍 **Built-in Inspector** - Debug and test your MCP server with ease
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 20.x or higher
+- npm 9.x or higher
+
+### Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/ViezeVingertjes/example-async-mcp.git
+
+# Navigate to the project directory
+cd example-async-mcp
+
 # Install dependencies
 npm install
 
@@ -22,23 +46,23 @@ npm install
 npm run build
 ```
 
-## Usage
-
-### Starting the Server
+### Running the Server
 
 ```bash
 npm start
 ```
 
-### Using the MCP Inspector
+### Using the Inspector
 
 ```bash
 npm run inspector
 ```
 
+## 📖 API Reference
+
 ### Available Tools
 
-#### 1. process_task
+#### `process_task`
 
 Creates a new asynchronous task.
 
@@ -53,21 +77,15 @@ Creates a new asynchronous task.
 }
 ```
 
-Parameters:
-- `input` (string, required): The input string to process
-- `delayMs` (number, optional): Processing delay in milliseconds (default: 5000)
-- `timeoutMs` (number, optional): Task timeout in milliseconds (default: 30000)
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| input | string | ✅ | - | The input string to process |
+| delayMs | number | ❌ | 5000 | Processing delay in milliseconds |
+| timeoutMs | number | ❌ | 30000 | Task timeout in milliseconds |
 
-Response:
-```json
-{
-  "taskId": "550e8400-e29b-41d4-a716-446655440000"
-}
-```
+#### `check_task_status`
 
-#### 2. check_task_status
-
-Check the status of a task.
+Check the status of an existing task.
 
 ```json
 {
@@ -78,92 +96,80 @@ Check the status of a task.
 }
 ```
 
-Parameters:
-- `taskId` (string, required): The ID of the task to check
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| taskId | string | ✅ | The ID of the task to check |
 
-Response:
-```json
-{
-  "status": "complete",
-  "result": "!dlroW ,olleH"
-}
-```
+### Task States
 
-Possible status values:
-- `pending`: Task created but not started
-- `processing`: Task is being processed
-- `complete`: Task completed successfully
-- `error`: Task failed
+| Status | Description |
+|--------|-------------|
+| 🕒 `pending` | Task created but not started |
+| ⚡ `processing` | Task is being processed |
+| ✅ `complete` | Task completed successfully |
+| ❌ `error` | Task failed |
 
-### Error Handling
+## ⚙️ Configuration
 
-The server includes proper error handling for various scenarios:
-
-1. Task Not Found
-```json
-{
-  "error": "No task found with ID: 550e8400-e29b-41d4-a716-446655440000",
-  "code": "TASK_NOT_FOUND"
-}
-```
-
-2. Task Timeout
-```json
-{
-  "error": "Task 550e8400-e29b-41d4-a716-446655440000 timed out",
-  "code": "TASK_TIMEOUT"
-}
-```
-
-3. Maximum Tasks Exceeded
-```json
-{
-  "error": "Maximum number of active tasks reached",
-  "code": "INVALID_REQUEST"
-}
-```
-
-## Configuration
-
-Configuration constants in `src/constants.ts`:
+Key configuration options in `src/constants.ts`:
 
 ```typescript
 export const DEFAULT_TASK_TIMEOUT_MS = 30000; // 30 seconds
 export const DEFAULT_TASK_DELAY_MS = 5000;    // 5 seconds
 export const DEFAULT_POLL_DELAY_MS = 10000;   // 10 seconds
 export const POLL_INTERVAL_MS = 100;          // 100ms
-export const MAX_TASKS = 1000;               // Maximum concurrent tasks
+export const MAX_TASKS = 1000;                // Maximum concurrent tasks
 ```
 
-## Development
+## 🛠️ Development
 
 ### Project Structure
 
-- `src/index.ts`: Main server implementation
-- `src/types.ts`: TypeScript types and interfaces
-- `src/constants.ts`: Configuration constants
-- `src/utils.ts`: Utility functions
+```
+src/
+├── index.ts       # Main server implementation
+├── types.ts       # TypeScript types and interfaces
+├── constants.ts   # Configuration constants
+└── utils.ts       # Utility functions
+```
 
-### Building
+### Development Commands
 
 ```bash
+# Build the project
 npm run build
-```
 
-### Watching for Changes
-
-```bash
+# Watch for changes
 npm run watch
+
+# Run tests
+npm test
+
+# Run linter
+npm run lint
 ```
 
-## License
+## 🤝 Contributing
 
-MIT License. See [LICENSE](LICENSE) for details.
-
-## Contributing
+We love your input! We want to make contributing as easy and transparent as possible. Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request 
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Model Context Protocol](https://github.com/modelcontextprotocol) for the protocol specification
+- All our [contributors](https://github.com/ViezeVingertjes/example-async-mcp/graphs/contributors)
+
+---
+
+<p align="center">
+  Made with ❤️ by the MCP community
+</p> 
