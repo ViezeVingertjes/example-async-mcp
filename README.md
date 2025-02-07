@@ -143,64 +143,15 @@ npm run build
 npm run watch
 
 # Run tests
-npm test                  # Run all tests
-npm run test:watch       # Run tests in watch mode
-npm run test:coverage    # Generate test coverage report
-npm run test:ui          # Open interactive test UI
+npm test
 
-# Run linter
-npm run lint
+# Run inspector
+npm run inspector
 ```
-
-### Testing
-
-The project uses Vitest for testing, offering several advantages:
-- 🚄 Up to 20x faster than Jest
-- 📝 Native TypeScript support
-- 🔄 Watch mode with HMR
-- 🎯 Smart test filtering
-- 📊 Built-in coverage reporting
-- 🖥️ Interactive UI mode
-- ⚡ Powered by Vite
-
-Example test:
-```typescript
-import { describe, it, expect } from 'vitest';
-import { sleep } from './utils';
-
-describe('Utils', () => {
-  it('should wait for the specified time', async () => {
-    const start = Date.now();
-    await sleep(100);
-    const elapsed = Date.now() - start;
-    expect(elapsed).toBeGreaterThanOrEqual(100);
-  });
-});
-```
-
-Run the interactive UI to view and debug tests:
-```bash
-npm run test:ui
-```
-
-## 🤝 Contributing
-
-We love your input! We want to make contributing as easy and transparent as possible. Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- [Model Context Protocol](https://github.com/modelcontextprotocol) for the protocol specification
-- All our [contributors](https://github.com/ViezeVingertjes/example-async-mcp/graphs/contributors)
 
 ---
 
