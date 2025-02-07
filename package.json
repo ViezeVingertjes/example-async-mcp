@@ -17,11 +17,11 @@
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "0.6.0",
-    "uuid": "^9.0.1"
+    "@modelcontextprotocol/sdk": "^1.4.1",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "@types/node": "^20.11.24",
+    "@types/node": "^22.13.1",
     "@types/uuid": "^9.0.8",
     "typescript": "^5.3.3"
   }
