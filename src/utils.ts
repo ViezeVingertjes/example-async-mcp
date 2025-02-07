@@ -1,9 +1,20 @@
 import { DEBUG } from './constants.js';
 import { ProcessTaskArgs, CheckTaskStatusArgs } from './types.js';
 
-export const log = (...args: any[]): void => {
-  if (DEBUG) {
-    console.error('[EXAMPLE MCP]', ...args);
+export const logger = {
+  info: (context: string, message: string, ...args: any[]): void => {
+    console.log(`[${new Date().toISOString()}] [INFO] [${context}] ${message}`, ...args);
+  },
+  error: (context: string, message: string, ...args: any[]): void => {
+    console.error(`[${new Date().toISOString()}] [ERROR] [${context}] ${message}`, ...args);
+  },
+  debug: (context: string, message: string, ...args: any[]): void => {
+    if (DEBUG) {
+      console.debug(`[${new Date().toISOString()}] [DEBUG] [${context}] ${message}`, ...args);
+    }
+  },
+  warn: (context: string, message: string, ...args: any[]): void => {
+    console.warn(`[${new Date().toISOString()}] [WARN] [${context}] ${message}`, ...args);
   }
 };
 
@@ -27,9 +38,15 @@ export const cleanupTasks = <T>(
   maxAge: number
 ): void => {
   const now = Date.now();
+  let cleanedCount = 0;
   for (const [id, task] of tasks.entries()) {
     if (now - task.timestamp > maxAge) {
+      logger.debug('Cleanup', `Removing stale task ${id}`);
       tasks.delete(id);
+      cleanedCount++;
     }
+  }
+  if (cleanedCount > 0) {
+    logger.info('Cleanup', `Removed ${cleanedCount} stale tasks`);
   }
 }; 

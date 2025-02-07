@@ -29,7 +29,7 @@ import {
   SERVER_VERSION,
 } from './constants.js';
 import {
-  log,
+  logger,
   isValidProcessTaskArgs,
   isValidCheckTaskStatusArgs,
   sleep,
@@ -42,7 +42,7 @@ class ExampleMcpServer {
   private cleanupInterval!: NodeJS.Timeout;
 
   constructor() {
-    log('Initializing Example MCP Server...');
+    logger.debug('ExampleMcpServer', 'Initializing MCP Server...');
     
     // Initialize MCP server
     this.server = new Server(
@@ -65,7 +65,7 @@ class ExampleMcpServer {
   private setupErrorHandling(): void {
     // Error handling
     this.server.onerror = (error) => {
-      console.error('[MCP Error]', error);
+      logger.error('Server', `MCP Error: ${error instanceof Error ? error.stack : error}`);
       if (error instanceof TaskError) {
         throw new McpError(ErrorCode.InvalidRequest, error.message);
       }
@@ -171,7 +171,7 @@ class ExampleMcpServer {
 
     // Start processing in background
     this.processTask(taskId, input, delayMs).catch(error => {
-      log('Error processing task:', error);
+      logger.error('ProcessTask', `Task ${taskId} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       this.activeTasks.set(taskId, {
         status: TaskStatusEnum.Error,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -304,6 +304,7 @@ class ExampleMcpServer {
   }
 
   private async processTask(taskId: string, input: string, delayMs: number): Promise<void> {
+    logger.debug('TaskProcessor', `Starting processing for ${taskId}`);
     const task = this.activeTasks.get(taskId);
     if (!task) {
       throw new TaskNotFoundError(taskId);
@@ -334,6 +335,7 @@ class ExampleMcpServer {
         timestamp: Date.now(),
         timeoutAt: task.timeoutAt
       });
+      logger.info('TaskProcessor', `Task ${taskId} completed successfully`);
     } catch (error) {
       // Update status to error
       this.activeTasks.set(taskId, {
@@ -347,14 +349,16 @@ class ExampleMcpServer {
   }
 
   private async cleanup(): Promise<void> {
+    logger.info('Shutdown', 'Starting server shutdown');
     clearInterval(this.cleanupInterval);
     await this.server.close();
+    logger.info('Shutdown', 'Server shutdown completed');
   }
 
   async run(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    log('Example MCP server running on stdio');
+    logger.info('Server', 'MCP server running on stdio');
   }
 }
 
