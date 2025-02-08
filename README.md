@@ -1,5 +1,6 @@
 # MCP Async Server
 
+[![smithery badge](https://smithery.ai/badge/@ViezeVingertjes/example-async-mcp)](https://smithery.ai/server/@ViezeVingertjes/example-async-mcp)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -29,6 +30,14 @@
 
 - Node.js 20.x or higher
 - npm 9.x or higher
+
+### Installing via Smithery
+
+To install Async MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@ViezeVingertjes/example-async-mcp):
+
+```bash
+npx -y @smithery/cli install @ViezeVingertjes/example-async-mcp --client claude
+```
 
 ### Installation
 
