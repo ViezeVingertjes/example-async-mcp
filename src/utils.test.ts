@@ -40,14 +40,14 @@ describe('Utils', () => {
       const validArgs = {
         input: 'test input',
         delayMs: 1000,
-        timeoutMs: 5000
+        timeoutMs: 5000,
       };
       expect(isValidProcessTaskArgs(validArgs)).toBe(true);
     });
 
     it('should validate minimal process task arguments', () => {
       const minimalArgs = {
-        input: 'test input'
+        input: 'test input',
       };
       expect(isValidProcessTaskArgs(minimalArgs)).toBe(true);
     });
@@ -55,7 +55,7 @@ describe('Utils', () => {
     it('should reject invalid process task arguments', () => {
       const invalidArgs = {
         delayMs: 1000,
-        timeoutMs: 5000
+        timeoutMs: 5000,
       };
       expect(isValidProcessTaskArgs(invalidArgs)).toBe(false);
     });
@@ -64,16 +64,16 @@ describe('Utils', () => {
   describe('isValidCheckTaskStatusArgs', () => {
     it('should validate correct check task status arguments', () => {
       const validArgs = {
-        taskId: '123e4567-e89b-12d3-a456-426614174000'
+        taskId: '123e4567-e89b-12d3-a456-426614174000',
       };
       expect(isValidCheckTaskStatusArgs(validArgs)).toBe(true);
     });
 
     it('should reject invalid check task status arguments', () => {
       const invalidArgs = {
-        taskId: 123
+        taskId: 123,
       };
       expect(isValidCheckTaskStatusArgs(invalidArgs)).toBe(false);
     });
   });
-}); 
+});

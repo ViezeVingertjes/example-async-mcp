@@ -42,7 +42,7 @@ class ExampleMcpServer {
 
   constructor() {
     logger.debug('ExampleMcpServer', 'Initializing MCP Server...');
-    
+
     // Initialize MCP server
     this.server = new Server(
       {
@@ -86,48 +86,50 @@ class ExampleMcpServer {
   }
 
   private setupToolHandlers(): void {
-    this.server.setRequestHandler(ListToolsRequestSchema, () => Promise.resolve({
-      tools: [
-        {
-          name: 'process_task',
-          description: 'Start processing a task asynchronously.',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              input: {
-                type: 'string',
-                description: 'The input to process'
+    this.server.setRequestHandler(ListToolsRequestSchema, () =>
+      Promise.resolve({
+        tools: [
+          {
+            name: 'process_task',
+            description: 'Start processing a task asynchronously.',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                input: {
+                  type: 'string',
+                  description: 'The input to process',
+                },
+                delayMs: {
+                  type: 'number',
+                  description: 'Optional delay in milliseconds to simulate processing time',
+                  default: DEFAULT_TASK_DELAY_MS,
+                },
+                timeoutMs: {
+                  type: 'number',
+                  description: 'Optional timeout in milliseconds',
+                  default: DEFAULT_TASK_TIMEOUT_MS,
+                },
               },
-              delayMs: {
-                type: 'number',
-                description: 'Optional delay in milliseconds to simulate processing time',
-                default: DEFAULT_TASK_DELAY_MS
+              required: ['input'],
+            },
+          },
+          {
+            name: 'check_task_status',
+            description: 'Check the status of an async task',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                taskId: {
+                  type: 'string',
+                  description: 'The task ID returned by process_task',
+                },
               },
-              timeoutMs: {
-                type: 'number',
-                description: 'Optional timeout in milliseconds',
-                default: DEFAULT_TASK_TIMEOUT_MS
-              }
+              required: ['taskId'],
             },
-            required: ['input']
-          }
-        },
-        {
-          name: 'check_task_status',
-          description: 'Check the status of an async task',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              taskId: {
-                type: 'string',
-                description: 'The task ID returned by process_task'
-              }
-            },
-            required: ['taskId']
-          }
-        }
-      ]
-    }));
+          },
+        ],
+      })
+    );
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       if (request.params.name === 'process_task') {
@@ -135,27 +137,20 @@ class ExampleMcpServer {
       } else if (request.params.name === 'check_task_status') {
         return await this.handleCheckTaskStatus(request.params.arguments);
       } else {
-        throw new McpError(
-          ErrorCode.MethodNotFound,
-          `Unknown tool: ${request.params.name}`
-        );
+        throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${request.params.name}`);
       }
     });
   }
 
-  private async handleProcessTask(args: unknown): Promise<{ content: { type: string; text: string }[] }> {
+  private async handleProcessTask(
+    args: unknown
+  ): Promise<{ content: { type: string; text: string }[] }> {
     if (!isValidProcessTaskArgs(args)) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        'Invalid process_task arguments'
-      );
+      throw new McpError(ErrorCode.InvalidParams, 'Invalid process_task arguments');
     }
 
     if (this.activeTasks.size >= MAX_TASKS) {
-      throw new McpError(
-        ErrorCode.InvalidRequest,
-        'Maximum number of active tasks reached'
-      );
+      throw new McpError(ErrorCode.InvalidRequest, 'Maximum number of active tasks reached');
     }
 
     const taskId = uuidv4();
@@ -165,16 +160,19 @@ class ExampleMcpServer {
     this.activeTasks.set(taskId, {
       status: TaskStatusEnum.Pending,
       timestamp: Date.now(),
-      timeoutAt: Date.now() + timeoutMs
+      timeoutAt: Date.now() + timeoutMs,
     });
 
     // Start processing in background and wait for initial setup
-    await this.processTask(taskId, input, delayMs).catch(error => {
-      logger.error('ProcessTask', `Task ${taskId} failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    await this.processTask(taskId, input, delayMs).catch((error) => {
+      logger.error(
+        'ProcessTask',
+        `Task ${taskId} failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
       this.activeTasks.set(taskId, {
         status: TaskStatusEnum.Error,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     });
 
@@ -183,18 +181,17 @@ class ExampleMcpServer {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(response)
-        }
-      ]
+          text: JSON.stringify(response),
+        },
+      ],
     };
   }
 
-  private async handleCheckTaskStatus(args: unknown): Promise<{ content: { type: string; text: string }[] }> {
+  private async handleCheckTaskStatus(
+    args: unknown
+  ): Promise<{ content: { type: string; text: string }[] }> {
     if (!isValidCheckTaskStatusArgs(args)) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        'Invalid check_task_status arguments'
-      );
+      throw new McpError(ErrorCode.InvalidParams, 'Invalid check_task_status arguments');
     }
 
     const { taskId } = args;
@@ -209,7 +206,7 @@ class ExampleMcpServer {
       this.activeTasks.set(taskId, {
         ...task,
         status: TaskStatusEnum.Error,
-        error: 'Task timed out'
+        error: 'Task timed out',
       });
       throw new TaskTimeoutError(taskId);
     }
@@ -219,21 +216,21 @@ class ExampleMcpServer {
       const response: TaskStatusResponse = {
         status: task.status,
         result: task.result,
-        error: task.error
+        error: task.error,
       };
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(response)
-          }
-        ]
+            text: JSON.stringify(response),
+          },
+        ],
       };
     }
 
     // Otherwise, wait for either a status change or timeout
     const initialStatus = task.status;
-    
+
     try {
       await new Promise<void>((resolve, reject) => {
         const checkInterval = setInterval(() => {
@@ -250,15 +247,17 @@ class ExampleMcpServer {
             this.activeTasks.set(taskId, {
               ...currentTask,
               status: TaskStatusEnum.Error,
-              error: 'Task timed out'
+              error: 'Task timed out',
             });
             reject(new TaskTimeoutError(taskId));
             return;
           }
 
           // Resolve if status changed or reached final state
-          if (currentTask.status !== initialStatus || 
-              [TaskStatusEnum.Complete, TaskStatusEnum.Error].includes(currentTask.status)) {
+          if (
+            currentTask.status !== initialStatus ||
+            [TaskStatusEnum.Complete, TaskStatusEnum.Error].includes(currentTask.status)
+          ) {
             clearInterval(checkInterval);
             resolve();
           }
@@ -289,16 +288,16 @@ class ExampleMcpServer {
     const response: TaskStatusResponse = {
       status: finalTask.status,
       result: finalTask.result,
-      error: finalTask.error
+      error: finalTask.error,
     };
 
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(response)
-        }
-      ]
+          text: JSON.stringify(response),
+        },
+      ],
     };
   }
 
@@ -313,7 +312,7 @@ class ExampleMcpServer {
       // Update status to processing
       this.activeTasks.set(taskId, {
         ...task,
-        status: TaskStatusEnum.Processing
+        status: TaskStatusEnum.Processing,
       });
 
       // Simulate some async processing
@@ -332,7 +331,7 @@ class ExampleMcpServer {
         status: TaskStatusEnum.Complete,
         result,
         timestamp: Date.now(),
-        timeoutAt: task.timeoutAt
+        timeoutAt: task.timeoutAt,
       });
       logger.info('TaskProcessor', `Task ${taskId} completed successfully`);
     } catch (error) {
@@ -341,7 +340,7 @@ class ExampleMcpServer {
         status: TaskStatusEnum.Error,
         error: error instanceof Error ? error.message : 'Unknown error',
         timestamp: Date.now(),
-        timeoutAt: task.timeoutAt
+        timeoutAt: task.timeoutAt,
       });
       throw error;
     }

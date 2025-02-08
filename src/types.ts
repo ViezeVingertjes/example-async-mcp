@@ -7,7 +7,7 @@ export enum TaskStatusEnum {
   /** Task has completed successfully */
   Complete = 'complete',
   /** Task encountered an error */
-  Error = 'error'
+  Error = 'error',
 }
 
 /** Represents the current state of a task */
@@ -94,4 +94,4 @@ export class TaskNotFoundError extends TaskError {
     super(`No task found with ID: ${taskId}`, 'TASK_NOT_FOUND');
     this.name = 'TaskNotFoundError';
   }
-} 
+}
