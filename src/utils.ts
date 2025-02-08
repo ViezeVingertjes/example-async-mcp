@@ -1,5 +1,5 @@
-import { DEBUG } from './constants.js';
-import { ProcessTaskArgs, CheckTaskStatusArgs } from './types.js';
+import { DEBUG, COMPLETED_TASK_RETENTION_MS } from './constants.js';
+import { ProcessTaskArgs, CheckTaskStatusArgs, TaskStatus, TaskStatusEnum } from './types.js';
 
 type LogArgs = string | number | boolean | null | undefined;
 type LogLevel = 'INFO' | 'ERROR' | 'DEBUG' | 'WARN';
@@ -63,16 +63,23 @@ export const isValidCheckTaskStatusArgs = (args: unknown): args is CheckTaskStat
 export const sleep = (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
-export const cleanupTasks = <T extends { timestamp: number }>(
-  tasks: Map<string, T>,
+export const cleanupTasks = (
+  tasks: Map<string, TaskStatus>,
   maxAge: number
 ): void => {
   const now = Date.now();
   let cleanedCount = 0;
   
   for (const [id, task] of tasks.entries()) {
-    if (now - task.timestamp > maxAge) {
-      logger.debug('Cleanup', `Removing stale task ${id}`);
+    const age = now - task.timestamp;
+    
+    // For completed tasks, use the longer retention time
+    const taskMaxAge = task.status === TaskStatusEnum.Complete 
+      ? COMPLETED_TASK_RETENTION_MS 
+      : maxAge;
+    
+    if (age > taskMaxAge) {
+      logger.debug('Cleanup', `Removing ${task.status} task ${id} (age: ${age}ms)`);
       tasks.delete(id);
       cleanedCount++;
     }
