@@ -24,6 +24,8 @@
 - 📝 **TypeScript Support** - Full type safety and modern JavaScript features
 - 🔍 **Built-in Inspector** - Debug and test your MCP server with ease
 
+<a href="https://glama.ai/mcp/servers/k2os9maqr0"><img width="380" height="200" src="https://glama.ai/mcp/servers/k2os9maqr0/badge" alt="Async Server MCP server" /></a>
+
 ## 🚀 Quick Start
 
 ### Prerequisites
